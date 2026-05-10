@@ -28,7 +28,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @router.post("/token", response_model=schemas.Token)
-def login_for_access_token(response: Response, form_data: schemas.UserLogin = Depends(), db: Session = Depends(get_db)):
+def login_for_access_token(response: Response, form_data: schemas.UserLogin, db: Session = Depends(get_db)):    
     user = auth.get_user(db, email=form_data.email)
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(

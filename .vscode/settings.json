@@ -1,0 +1,15 @@
+{
+    "sqltools.connections": [
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "viaduct.proxy.rlwy.net",
+            "port": 40532,
+            "driver": "PostgreSQL",
+            "name": "Budget App Railway",
+            "database": "railway",
+            "username": "postgres",
+            "password": "lRezuzrVfNAeNAmVODyDZoOcUbdvGdJD"
+        }
+    ]
+}

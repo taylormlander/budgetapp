@@ -111,3 +111,5 @@ class Income(Base):
     source = Column(String)
     notes = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    owner = relationship("User", back_populates="income_entries")
