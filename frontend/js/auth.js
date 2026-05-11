@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 if (response.ok) {
-                    window.location.href = "dashboard.html";
+                    window.location.href = "/static/dashboard.html";
                 } else {
                     alert("Login failed: " + (await response.json()).detail);
                 }
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (response.ok) {
                     alert("Registration successful! Please log in.");
-                    window.location.href = "index.html";
+                    window.location.href = "/";
                 } else {
                     alert("Registration failed: " + (await response.json()).detail);
                 }
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 if (response.ok) {
-                    window.location.href = "index.html";
+                    window.location.href = "/";
                 } else {
                     alert("Logout failed.");
                 }

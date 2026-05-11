@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget App - Categories</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=DM+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Categories</h1>
+        <form id="category-form">
+            <input type="hidden" id="category-id">
+            <input type="text" id="category-name" placeholder="Category Name" required>
+            <input type="color" id="category-color" value="#cccccc">
+            <input type="text" id="category-icon" placeholder="Icon (e.g., fa-solid fa-pizza-slice)">
+            <input type="text" id="category-folder-group" placeholder="Folder Group (optional)">
+            <button type="submit">Add/Update Category</button>
+        </form>
+        <div id="categories-list">
+            <!-- Categories will be loaded here -->
+        </div>
+        <button id="logout-button">Logout</button>
+    </div>
+    <script src="./js/categories.js"></script>
+    <script src="./js/auth.js"></script>
+</body>
+</html>
