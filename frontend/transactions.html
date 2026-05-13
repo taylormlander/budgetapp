@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget App - Transactions</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=DM+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Transactions</h1>
+        <nav>
+            <a href="/static/dashboard.html">Dashboard</a>
+            <a href="/static/categories.html">Categories</a>
+        </nav>
+        
+        <form id="transaction-form">
+            <input type="hidden" id="transaction-id">
+            
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" step="0.01" required>
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" required>
+
+            <label for="description">Description:</label>
+            <input type="text" id="description" required>
+
+            <label for="category">Category:</label>
+            <select id="category-select">
+                <option value="uncategorized">Uncategorized</option>
+            </select>
+            <a href="/static/categories.html" target="_blank">Create New Category</a>
+
+            <label for="type">Type:</label>
+            <input type="radio" id="income-type" name="transaction-type" value="income" required>
+            <label for="income-type">Income</label>
+            <input type="radio" id="expense-type" name="transaction-type" value="expense" required>
+            <label for="expense-type">Expense</label>
+
+            <label for="notes">Notes (optional):</label>
+            <textarea id="notes"></textarea>
+
+            <button type="submit">Add/Update Transaction</button>
+        </form>
+
+        <div id="transactions-list">
+            <!-- Transactions will be loaded here -->
+        </div>
+
+        <button id="logout-button">Logout</button>
+    </div>
+    <script src="./js/auth.js"></script>
+    <script src="./js/transactions.js"></script>
+</body>
+</html>
