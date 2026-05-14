@@ -11,15 +11,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const password = loginForm.password.value;
 
             try {
+                const formData = new URLSearchParams();
+                formData.append("username", email);
+                formData.append("password", password);
+
                 const response = await fetch("/users/token", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
+                        "Content-Type": "application/x-www-form-urlencoded",
                     },
-                    body: JSON.stringify({ email, password }),
+                    body: formData.toString(),
+                    credentials: "include" // Important for sending cookies
                 });
 
                 if (response.ok) {
+                    // No need to handle token, as it's set as an HttpOnly cookie
                     window.location.href = "/static/dashboard.html";
                 } else {
                     alert("Login failed: " + (await response.json()).detail);

@@ -27,27 +27,50 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-@router.post("/token", response_model=schemas.Token)
-def login_for_access_token(response: Response, form_data: schemas.UserLogin, db: Session = Depends(get_db)):    
-    user = auth.get_user(db, email=form_data.email)
+from fastapi.security import OAuth2PasswordRequestForm # Import this for form_data type hint
+
+@router.post("/token")
+def login_for_access_token(
+    response: Response,
+    form_data: OAuth2PasswordRequestForm = Depends(), # Use OAuth2PasswordRequestForm
+    db: Session = Depends(get_db)
+):
+    user = auth.get_user(db, email=form_data.username) # Use form_data.username
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    # Set access token to expire in 7 days
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
+    access_token = auth.create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
+
+    # Set HttpOnly cookie for secure authentication
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,  # Prevents client-side JavaScript from accessing the cookie
+        secure=os.getenv("ENVIRONMENT") == "production",  # True in prod, False in dev
+        samesite="lax",  # "lax" is a good balance for CSRF protection
+        max_age=60 * 60 * 24 * 7,  # 7 days expiration
+        path="/"  # Ensure the cookie is sent for all paths
     )
-    response.set_cookie(key="access_token", value=access_token, httponly=True, expires=access_token_expires.total_seconds())
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    return {"message": "Login successful"}
 
 @router.get("/users/me/", response_model=schemas.UserOut)
 async def read_users_me(current_user: schemas.UserOut = Depends(auth.get_current_user)):
     return current_user
 
 @router.post("/logout")
-async def logout(response: Response):
-    response.delete_cookie(key="access_token")
+def logout(response: Response):
+    # Delete the HttpOnly cookie to log out the user
+    response.delete_cookie(
+        key="access_token",
+        path="/",  # Must match the path used when setting the cookie
+        httponly=True,  # Must match the httponly setting when the cookie was set
+        secure=os.getenv("ENVIRONMENT") == "production", # Must match the secure setting
+        samesite="lax" # Must match the samesite setting
+    )
     return {"message": "Logged out successfully"}

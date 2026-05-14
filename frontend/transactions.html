@@ -33,6 +33,10 @@
             </select>
             <a href="/static/categories.html" target="_blank">Create New Category</a>
 
+            <label for="vendor">Vendor (optional):</label>
+            <input type="text" id="vendor" list="vendor-suggestions" placeholder="Vendor Name">
+            <datalist id="vendor-suggestions"></datalist>
+            
             <label for="type">Type:</label>
             <input type="radio" id="income-type" name="transaction-type" value="income" required>
             <label for="income-type">Income</label>

@@ -105,3 +105,11 @@ a:hover {
 .hidden {
     display: none;
 }
+
+.income-amount {
+    color: green;
+}
+
+.expense-amount {
+    color: red;
+} 

@@ -48,25 +48,7 @@ class TransactionBase(BaseModel):
     description: str
     category_id: Optional[int] = None
     type: str  # "income" or "expense"
-    notes: Optional[str] = None
-
-class TransactionCreate(TransactionBase):
-    pass
-
-class TransactionOut(TransactionBase):
-    id: int
-    user_id: int
-    created_at: datetime
-
-    class Config:
-        orm_mode = True
-
-class TransactionBase(BaseModel):
-    amount: float
-    date: datetime
-    description: str
-    category_id: Optional[int] = None
-    type: str  # 'income' or 'expense'
+    vendor: Optional[str] = None # New field
     notes: Optional[str] = None
 
 class TransactionCreate(TransactionBase):

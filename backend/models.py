@@ -43,6 +43,7 @@ class Transaction(Base):
     description = Column(String)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     type = Column(String)  # 'income' or 'expense'
+    vendor = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

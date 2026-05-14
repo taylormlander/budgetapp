@@ -25,12 +25,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch("/categories/");
+            const response = await fetch("/categories/", {
+                credentials: "include" // Important for sending HttpOnly cookies
+            });
             if (response.ok) {
                 const categories = await response.json();
                 displayCategories(categories);
             } else if (response.status === 401) {
-                window.location.href = "/"; // Redirect to login if unauthorized
+                // If unauthorized, redirect to login page
+                window.location.href = "/static/index.html";
             } else {
                 console.error("Failed to fetch categories");
             }

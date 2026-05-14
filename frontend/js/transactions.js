@@ -14,7 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     async function fetchCategories() {
-        const response = await fetch("/categories/");
+        const response = await fetch("/categories/", {
+            credentials: "include" // Important for sending HttpOnly cookies
+        });
 
         if (response.ok) {
             const categories = await response.json();
@@ -27,28 +29,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 categorySelect.appendChild(option);
             });
         } else if (response.status === 401) {
-            window.location.href = "/";
+            window.location.href = "/static/index.html";
         } else {
             console.error("Failed to fetch categories");
         }
     }
 
     async function fetchTransactions() {
-        const response = await fetch("/transactions/");
+        const response = await fetch("/transactions/", {
+            credentials: "include" // Important for sending HttpOnly cookies
+        });
 
         if (response.ok) {
             const transactions = await response.json();
             transactionsList.innerHTML = "";
             transactions.forEach(transaction => {
                 const transactionElement = document.createElement("div");
+                const amountClass = transaction.type === "income" ? "income-amount" : "expense-amount";
+                const amountPrefix = transaction.type === "income" ? "+" : "-";
+
                 transactionElement.className = "transaction-item";
                 transactionElement.innerHTML = `
-                    <p><strong>Amount:</strong> $${transaction.amount.toFixed(2)}</p>
+                    <p><strong class="${amountClass}">${amountPrefix}$${transaction.amount.toFixed(2)}</strong></p>
                     <p><strong>Date:</strong> ${new Date(transaction.date).toLocaleDateString()}</p>
-                    <p><strong>Description:</strong> ${transaction.description}</p>
+                    ${transaction.vendor ? `<p><strong>Vendor:</strong> ${transaction.vendor}</p>` : ``}
+                    ${transaction.description ? `<p><strong>Description:</strong> ${transaction.description}</p>` : ``}
                     <p><strong>Category:</strong> ${transaction.category ? transaction.category.name : "Uncategorized"}</p>
-                    <p><strong>Type:</strong> ${transaction.type}</p>
-                    <p><strong>Notes:</strong> ${transaction.notes || "N/A"}</p>
+                    ${transaction.notes ? `<p><strong>Notes:</strong> ${transaction.notes}</p>` : ``}
                     <button class="edit-transaction" data-id="${transaction.id}">Edit</button>
                     <button class="delete-transaction" data-id="${transaction.id}">Delete</button>
                 `;
@@ -64,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         } else if (response.status === 401) {
-            window.location.href = "/";
+            window.location.href = "/static/index.html";
         } else {
             console.error("Failed to fetch transactions");
         }
@@ -77,8 +84,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const date = document.getElementById("date").value;
         const description = document.getElementById("description").value;
         const categoryId = categorySelect.value === "" ? null : parseInt(categorySelect.value);
-        const type = document.querySelector("input[name='transaction-type']:checked").value;
+        const type = document.querySelector("input[name=\'transaction-type\']:checked").value;
         const notes = document.getElementById("notes").value;
+        const vendor = document.getElementById("vendor").value;
 
         const transactionData = {
             amount,
@@ -86,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description,
             category_id: categoryId,
             type,
+            vendor,
             notes,
         };
 
@@ -97,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(transactionData),
+                credentials: "include" // Important for sending HttpOnly cookies
             });
         } else {
             response = await fetch("/transactions/", {
@@ -105,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(transactionData),
+                credentials: "include" // Important for sending HttpOnly cookies
             });
         }
 
@@ -113,14 +124,16 @@ document.addEventListener("DOMContentLoaded", () => {
             editingTransactionId = null;
             await fetchTransactions();
         } else if (response.status === 401) {
-            window.location.href = "/";
+            window.location.href = "/static/index.html";
         } else {
             console.error("Failed to save transaction");
         }
     });
 
     async function editTransaction(id) {
-        const response = await fetch(`/transactions/${id}`);
+        const response = await fetch(`/transactions/${id}`, {
+            credentials: "include" // Important for sending HttpOnly cookies
+        });
 
         if (response.ok) {
             const transaction = await response.json();
@@ -128,11 +141,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("date").value = new Date(transaction.date).toISOString().split("T")[0];
             document.getElementById("description").value = transaction.description;
             categorySelect.value = transaction.category_id || "";
-            document.querySelector(`input[name='transaction-type'][value='${transaction.type}']`).checked = true;
+            document.querySelector(`input[name=\'transaction-type\"][value=\'${transaction.type}\\']`).checked = true;
+            document.getElementById("vendor").value = transaction.vendor || "";
             document.getElementById("notes").value = transaction.notes || "";
             editingTransactionId = transaction.id;
         } else if (response.status === 401) {
-            window.location.href = "/";
+            window.location.href = "/static/index.html";
         } else {
             console.error("Failed to fetch transaction for editing");
         }
@@ -145,12 +159,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const response = await fetch(`/transactions/${id}`, {
             method: "DELETE",
+            credentials: "include" // Important for sending HttpOnly cookies
         });
 
         if (response.ok) {
             await fetchTransactions();
         } else if (response.status === 401) {
-            window.location.href = "/";
+            window.location.href = "/static/index.html";
         } else {
             console.error("Failed to delete transaction");
         }
