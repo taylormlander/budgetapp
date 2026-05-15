@@ -47,10 +47,17 @@ def update_category(
     db_category = db.query(models.Category).filter(models.Category.id == category_id, models.Category.user_id == current_user.id).first()
     if db_category is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
-    
+
+    # Prevent renaming debt categories
+    if db_category.is_debt_category:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Debt categories cannot be renamed. Update the debt instead."
+        )
+
     for key, value in category.dict().items():
         setattr(db_category, key, value)
-    
+
     db.commit()
     db.refresh(db_category)
     return db_category
@@ -64,7 +71,14 @@ def delete_category(
     db_category = db.query(models.Category).filter(models.Category.id == category_id, models.Category.user_id == current_user.id).first()
     if db_category is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
-    
+
+    # Prevent deleting debt categories
+    if db_category.is_debt_category:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Debt categories cannot be deleted. Delete the debt instead."
+        )
+
     db.delete(db_category)
     db.commit()
     return

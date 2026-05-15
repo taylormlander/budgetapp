@@ -13,6 +13,7 @@
         <nav>
             <a href="/static/dashboard.html">Dashboard</a>
             <a href="/static/categories.html">Categories</a>
+            <a href="/static/debts.html">Debts</a>
         </nav>
         
         <form id="transaction-form">
@@ -29,9 +30,14 @@
 
             <label for="category">Category:</label>
             <select id="category-select">
-                <option value="uncategorized">Uncategorized</option>
+                <option value="">Uncategorized</option>
             </select>
             <a href="/static/categories.html" target="_blank">Create New Category</a>
+
+            <label for="debt-select">Link to Debt (optional):</label>
+            <select id="debt-select">
+                <option value="">None</option>
+            </select>
 
             <label for="vendor">Vendor (optional):</label>
             <input type="text" id="vendor" list="vendor-suggestions" placeholder="Vendor Name">

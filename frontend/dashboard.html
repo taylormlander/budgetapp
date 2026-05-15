@@ -6,16 +6,63 @@
     <title>Budget App - Dashboard</title>
     <link rel="stylesheet" href="./css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=DM+Mono&display=swap" rel="stylesheet">
+    <style>
+        .debt-summary {
+            background-color: #fdf2f2;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .debt-summary h3 {
+            margin: 0 0 10px 0;
+            color: #c0392b;
+        }
+        .debt-summary-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .debt-stat {
+            flex: 1;
+            min-width: 150px;
+        }
+        .debt-stat .stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        .debt-stat .stat-label {
+            font-size: 0.85em;
+            color: #666;
+        }
+        .debt-stat .stat-value.negative {
+            color: #e74c3c;
+        }
+        .debt-stat .stat-value.positive {
+            color: #27ae60;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Dashboard</h1>
-        <p>Welcome to your budgeting dashboard!</p>
         <nav>
-            <a href="/static/categories.html">Categories</a>
             <a href="/static/transactions.html">Transactions</a>
+            <a href="/static/categories.html">Categories</a>
             <a href="/static/debts.html">Debts</a>
         </nav>
+
+        <div id="debt-summary" class="debt-summary">
+            <h3>Debt Summary</h3>
+            <div class="debt-summary-stats" id="debt-summary-stats">
+                <!-- Debt stats will be loaded here -->
+            </div>
+        </div>
+
+        <div id="dashboard-content">
+            <!-- Dashboard content will be loaded here -->
+        </div>
+
         <button id="logout-button">Logout</button>
     </div>
     <script src="./js/auth.js"></script>

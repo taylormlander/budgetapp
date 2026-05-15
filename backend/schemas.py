@@ -30,6 +30,8 @@ class CategoryBase(BaseModel):
     color: Optional[str] = None
     icon: Optional[str] = None
     folder_group: Optional[str] = None
+    is_debt_category: bool = False
+    linked_debt_id: Optional[int] = None
 
 class CategoryCreate(CategoryBase):
     pass
@@ -47,8 +49,9 @@ class TransactionBase(BaseModel):
     date: datetime
     description: str
     category_id: Optional[int] = None
+    debt_id: Optional[int] = None
     type: str  # "income" or "expense"
-    vendor: Optional[str] = None # New field
+    vendor: Optional[str] = None
     notes: Optional[str] = None
 
 class TransactionCreate(TransactionBase):
@@ -59,6 +62,7 @@ class TransactionOut(TransactionBase):
     user_id: int
     created_at: datetime
     category: Optional[CategoryOut] = None
+    debt: Optional["DebtOut"] = None
 
     class Config:
         orm_mode = True

@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const transactionForm = document.getElementById("transaction-form");
     const transactionsList = document.getElementById("transactions-list");
     const categorySelect = document.getElementById("category-select");
+    const debtSelect = document.getElementById("debt-select");
     const logoutButton = document.getElementById("logout-button");
 
     let editingTransactionId = null;
@@ -15,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchCategories() {
         const response = await fetch("/categories/", {
-            credentials: "include" // Important for sending HttpOnly cookies
+            credentials: "include"
         });
 
         if (response.ok) {
@@ -35,9 +36,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function fetchDebts() {
+        const response = await fetch("/debts/", {
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            const debts = await response.json();
+            debtSelect.innerHTML = `<option value="">None</option>`;
+            debts.forEach(debt => {
+                const option = document.createElement("option");
+                option.value = debt.id;
+                option.textContent = `${debt.name} ($${debt.current_balance.toFixed(2)} remaining)`;
+                debtSelect.appendChild(option);
+            });
+        } else if (response.status === 401) {
+            window.location.href = "/static/index.html";
+        } else {
+            console.error("Failed to fetch debts");
+        }
+    }
+
     async function fetchTransactions() {
         const response = await fetch("/transactions/", {
-            credentials: "include" // Important for sending HttpOnly cookies
+            credentials: "include"
         });
 
         if (response.ok) {
@@ -55,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${transaction.vendor ? `<p><strong>Vendor:</strong> ${transaction.vendor}</p>` : ``}
                     ${transaction.description ? `<p><strong>Description:</strong> ${transaction.description}</p>` : ``}
                     <p><strong>Category:</strong> ${transaction.category ? transaction.category.name : "Uncategorized"}</p>
+                    ${transaction.debt ? `<p><strong>Linked Debt:</strong> ${transaction.debt.name}</p>` : ``}
                     ${transaction.notes ? `<p><strong>Notes:</strong> ${transaction.notes}</p>` : ``}
                     <button class="edit-transaction" data-id="${transaction.id}">Edit</button>
                     <button class="delete-transaction" data-id="${transaction.id}">Delete</button>
@@ -84,7 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const date = document.getElementById("date").value;
         const description = document.getElementById("description").value;
         const categoryId = categorySelect.value === "" ? null : parseInt(categorySelect.value);
-        const type = document.querySelector("input[name=\'transaction-type\']:checked").value;
+        const debtId = debtSelect.value === "" ? null : parseInt(debtSelect.value);
+        const type = document.querySelector("input[name='transaction-type']:checked").value;
         const notes = document.getElementById("notes").value;
         const vendor = document.getElementById("vendor").value;
 
@@ -93,6 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
             date: new Date(date).toISOString(),
             description,
             category_id: categoryId,
+            debt_id: debtId,
             type,
             vendor,
             notes,
@@ -106,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(transactionData),
-                credentials: "include" // Important for sending HttpOnly cookies
+                credentials: "include"
             });
         } else {
             response = await fetch("/transactions/", {
@@ -115,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(transactionData),
-                credentials: "include" // Important for sending HttpOnly cookies
+                credentials: "include"
             });
         }
 
@@ -123,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
             transactionForm.reset();
             editingTransactionId = null;
             await fetchTransactions();
+            await fetchDebts();
         } else if (response.status === 401) {
             window.location.href = "/static/index.html";
         } else {
@@ -132,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function editTransaction(id) {
         const response = await fetch(`/transactions/${id}`, {
-            credentials: "include" // Important for sending HttpOnly cookies
+            credentials: "include"
         });
 
         if (response.ok) {
@@ -141,7 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("date").value = new Date(transaction.date).toISOString().split("T")[0];
             document.getElementById("description").value = transaction.description;
             categorySelect.value = transaction.category_id || "";
-            document.querySelector(`input[name=\'transaction-type\"][value=\'${transaction.type}\\']`).checked = true;
+            debtSelect.value = transaction.debt_id || "";
+            document.querySelector(`input[name='transaction-type'][value='${transaction.type}']`).checked = true;
             document.getElementById("vendor").value = transaction.vendor || "";
             document.getElementById("notes").value = transaction.notes || "";
             editingTransactionId = transaction.id;
@@ -159,11 +186,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const response = await fetch(`/transactions/${id}`, {
             method: "DELETE",
-            credentials: "include" // Important for sending HttpOnly cookies
+            credentials: "include"
         });
 
         if (response.ok) {
             await fetchTransactions();
+            await fetchDebts();
         } else if (response.status === 401) {
             window.location.href = "/static/index.html";
         } else {
@@ -172,5 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     fetchCategories();
+    fetchDebts();
     fetchTransactions();
 });

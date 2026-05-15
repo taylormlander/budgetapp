@@ -27,6 +27,8 @@ class Category(Base):
     color = Column(String, nullable=True)
     icon = Column(String, nullable=True)
     folder_group = Column(String, nullable=True)
+    is_debt_category = Column(Boolean, default=False)
+    linked_debt_id = Column(Integer, ForeignKey("debts.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="categories")
@@ -42,6 +44,7 @@ class Transaction(Base):
     date = Column(DateTime)
     description = Column(String)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    debt_id = Column(Integer, ForeignKey("debts.id"), nullable=True)
     type = Column(String)  # 'income' or 'expense'
     vendor = Column(String, nullable=True)
     notes = Column(String, nullable=True)
@@ -49,6 +52,7 @@ class Transaction(Base):
 
     owner = relationship("User", back_populates="transactions")
     category = relationship("Category", back_populates="transactions")
+    debt = relationship("Debt", back_populates="transactions")
 
 class Rule(Base):
     __tablename__ = "rules"
@@ -74,8 +78,6 @@ class SavingsGoal(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="savings_goals")
-    # Assuming a savings goal can be linked to a category for auto-updating
-    # This needs to be carefully managed in the application logic
     linked_category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     linked_category = relationship("Category", back_populates="savings_goals")
 
@@ -92,6 +94,7 @@ class Debt(Base):
 
     owner = relationship("User", back_populates="debts")
     payments = relationship("DebtPayment", back_populates="debt")
+    transactions = relationship("Transaction", back_populates="debt")
 
 class DebtPayment(Base):
     __tablename__ = "debt_payments"

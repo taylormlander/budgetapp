@@ -12,18 +12,51 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "/static/index.html";
     });
 
+    async function fetchTransactions() {
+        const response = await fetch("/transactions/", {
+            credentials: "include"
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+        return [];
+    }
+
     async function fetchDebts() {
         const response = await fetch("/debts/", {
-            credentials: "include" // Important for sending HttpOnly cookies
+            credentials: "include"
         });
 
         if (response.ok) {
             const debts = await response.json();
+            const transactions = await fetchTransactions();
             debtsList.innerHTML = "";
             debts.forEach(debt => {
                 const debtElement = document.createElement("div");
                 debtElement.className = "debt-item";
-                const progress = ((debt.total_balance - debt.current_balance) / debt.total_balance) * 100;
+                const progress = debt.total_balance > 0
+                    ? ((debt.total_balance - debt.current_balance) / debt.total_balance) * 100
+                    : 0;
+
+                // Find transactions linked to this debt
+                const linkedTransactions = transactions.filter(t => t.debt_id === debt.id);
+
+                let transactionsHtml = "";
+                if (linkedTransactions.length > 0) {
+                    transactionsHtml = `<div class="debt-transactions">
+                        <h4>Linked Transactions (${linkedTransactions.length})</h4>`;
+                    linkedTransactions.forEach(t => {
+                        const amountClass = t.type === "income" ? "income-amount" : "expense-amount";
+                        const prefix = t.type === "income" ? "+" : "-";
+                        transactionsHtml += `
+                            <div class="debt-transaction-item">
+                                <span>${new Date(t.date).toLocaleDateString()} - ${t.description || "No description"}</span>
+                                <span class="${amountClass}">${prefix}$${t.amount.toFixed(2)}</span>
+                            </div>`;
+                    });
+                    transactionsHtml += `</div>`;
+                }
+
                 debtElement.innerHTML = `
                     <p><strong>Name:</strong> ${debt.name}</p>
                     <p><strong>Total Balance:</strong> $${debt.total_balance.toFixed(2)}</p>
@@ -31,8 +64,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${debt.interest_rate ? `<p><strong>Interest Rate:</strong> ${debt.interest_rate}%</p>` : ``}
                     ${debt.minimum_payment ? `<p><strong>Minimum Payment:</strong> $${debt.minimum_payment.toFixed(2)}</p>` : ``}
                     <div class="debt-progress-bar">
-                        <div class="debt-progress" style="width: ${progress.toFixed(2)}%;">${progress.toFixed(2)}% Paid</div>
+                        <div class="debt-progress" style="width: ${Math.max(progress, 0).toFixed(2)}%;">${Math.max(progress, 0).toFixed(2)}% Paid</div>
                     </div>
+                    ${transactionsHtml}
                     <button class="edit-debt" data-id="${debt.id}">Edit</button>
                     <button class="delete-debt" data-id="${debt.id}">Delete</button>
                 `;
@@ -79,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(debtData),
-                credentials: "include" // Important for sending HttpOnly cookies
+                credentials: "include"
             });
         } else {
             response = await fetch("/debts/", {
@@ -88,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(debtData),
-                credentials: "include" // Important for sending HttpOnly cookies
+                credentials: "include"
             });
         }
 
@@ -105,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function editDebt(id) {
         const response = await fetch(`/debts/${id}`, {
-            credentials: "include" // Important for sending HttpOnly cookies
+            credentials: "include"
         });
 
         if (response.ok) {
@@ -131,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const response = await fetch(`/debts/${id}`, {
             method: "DELETE",
-            credentials: "include" // Important for sending HttpOnly cookies
+            credentials: "include"
         });
 
         if (response.ok) {
